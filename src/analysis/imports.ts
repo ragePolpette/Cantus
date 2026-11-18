@@ -258,11 +258,6 @@ export function analyzeModule(fileName: string, fileSource: string, report?: Rep
     ...module.staticExports.filter((entry) => entry.entries.some((item) => item.moduleRequest)).map((entry) => [entry.start, entry.end] as const),
   ];
   const notReferences = new Set<number>();
-  for (const { entries } of module.staticExports) {
-    for (const { exportName, localName } of entries) {
-      if (exportName.start !== null && exportName.start !== localName.start) notReferences.add(exportName.start);
-    }
-  }
   const members = new Map<number, string>();
   const found = new Map<number, { name: string }>();
   const lines = source.split("\n");
@@ -521,6 +516,10 @@ export function analyzeModule(fileName: string, fileSource: string, report?: Rep
     VariableDeclaration(node) {
       const scope = node.kind === "var" ? nearestFunction() : top();
       for (const declarator of node.declarations) declarePattern(declarator.id, scope);
+    },
+    ExportSpecifier(node) {
+      // Only the local binding is a reference. The public name can be an alias.
+      if (node.exported.start !== node.local.start) notReferences.add(node.exported.start);
     },
     LabeledStatement: markLabel,
     BreakStatement: markLabel,

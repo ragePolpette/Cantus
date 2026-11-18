@@ -2,7 +2,7 @@
 
 Come si usa Cantus, dall'installazione al lavoro di tutti i giorni. È scritta per chi lo usa; la descrizione tecnica completa (in inglese) in [REFERENCE.md](REFERENCE.md).
 
-Cantus è ancora un progetto in corso, senza una versione pubblica: dove una cosa non è provata, la guida lo dice. I limiti generali sono nel [README](../README.md).
+Cantus è in sviluppo. I limiti generali sono nel [README](../README.md).
 
 ## Indice
 
@@ -50,7 +50,7 @@ claude plugin install cantus@cantus
 
 Dopo un aggiornamento del repository: `claude plugin update cantus@cantus` e riapri la sessione.
 
-**Il nome del repository.** Dal 29/10 il repository si chiama `cantus`. Se hai un checkout fatto quando si chiamava `ArchFlow`, GitHub reindirizza il vecchio indirizzo, ma conviene aggiornare il remote: `git remote set-url origin https://github.com/ragePolpette/Cantus.git`.
+**Checkout precedente.** Clona il repository pubblico in una nuova cartella. Ha una cronologia Git indipendente.
 
 **Windows.** In PowerShell, con pnpm alla versione fissata dal progetto (altre versioni rovinano il lockfile):
 

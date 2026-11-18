@@ -22,9 +22,14 @@ test("usages of imported bindings are found with line, column and snippet", () =
     "const node = <Widget label={fmt(2)} />;",
     "export { fmt };",
     'export { fmt as again } from "./a";',
+    "export { fmt as format };",
   ].join("\n");
   const { usages } = analyzeModule("x.tsx", source);
-  assert.deepEqual(usages.fmt.map((usage) => usage.line), [4, 5, 7, 8], "object keys, method names and re-exports are not uses");
+  assert.deepEqual(
+    usages.fmt.map((usage) => [usage.line, usage.column]),
+    [[4, 22], [5, 33], [7, 29], [8, 10], [10, 10]],
+    "count local bindings in exports and skip direct re-exports",
+  );
   assert.deepEqual(usages.Money.map((usage) => [usage.line, usage.column]), [[4, 14]]);
   assert.deepEqual(usages.db.map((usage) => usage.member), ["query"]);
   assert.deepEqual(usages.Widget.map((usage) => usage.line), [7]);
