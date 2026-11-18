@@ -1,0 +1,11 @@
+{
+  "name": "cantus",
+  "displayName": "Cantus",
+  "version": "0.2.21",
+  "description": "A map of the codebase for Claude Code: block briefings, API search and callers over MCP, per-block specialists, and hooks that warn when an edit breaks other blocks.",
+  "author": { "name": "ragePolpette" },
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/ragePolpette/Cantus",
+  "repository": "https://github.com/ragePolpette/Cantus",
+  "keywords": ["architecture", "context", "subagents", "mcp", "codebase-map"]
+}

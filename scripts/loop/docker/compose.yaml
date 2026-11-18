@@ -1,0 +1,23 @@
+# The phase 1 loop in a container. From scripts/loop/docker:
+#   docker compose run --rm loop                  # all the scenarios, as in loop.config.json
+#   docker compose run --rm loop --only plugin    # extra arguments go to loop.mjs
+# Needs CLAUDE_CODE_OAUTH_TOKEN (from `claude setup-token` on the host) in the environment or in .env.
+services:
+  loop:
+    build: .
+    image: cantus-loop
+    environment:
+      CLAUDE_CODE_OAUTH_TOKEN: ${CLAUDE_CODE_OAUTH_TOKEN:?run claude setup-token on the host and set CLAUDE_CODE_OAUTH_TOKEN}
+    volumes:
+      # Cantus: the loop clones it, it never writes here.
+      - ../../..:/cantus:ro
+      # Your projects, read-only: the loop works on clones. Adjust the host path.
+      - ${LEGACY_DIR:-./no-legacy}:/targets/legacy:ro
+      # Working copies, clones, transcripts: a Docker volume (faster than a Windows folder, and
+      # git worktrees live here).
+      - loop-work:/work
+      # Reports: a host folder you can open.
+      - ${REPORTS_DIR:-./reports}:/reports
+    entrypoint: ["node", "/cantus/scripts/loop/loop.mjs", "--config", "/cantus/scripts/loop/loop.config.json"]
+volumes:
+  loop-work:

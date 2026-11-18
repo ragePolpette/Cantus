@@ -1,0 +1,23 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.env
+.env.local
+.DS_Store
+*.log
+coverage/
+.turbo/
+**/.cantus/view.html
+**/.cantus/analysis.log
+**/.cantus/runs/
+**/.cantus/cache/
+**/.cantus/hooks.log
+
+# Local configuration of the phase 1 loop (scripts/loop/loop.config.example.json)
+scripts/loop/loop.config.json
+scripts/loop/docker/.env
+scripts/loop/docker/reports/
+loop-work/
+
+# Fixtures analyzed in place leave Cantus's own files behind (cache, logs, .cantus/.gitignore)
+tests/fixtures/**/.cantus/

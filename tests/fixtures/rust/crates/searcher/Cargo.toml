@@ -1,0 +1,6 @@
+[package]
+name = "shop-searcher"
+version = "0.1.0"
+
+[dependencies]
+matcher = { package = "shop-matcher", path = "../matcher" }

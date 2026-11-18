@@ -1,0 +1,11 @@
+{
+  "name": "cantus",
+  "owner": { "name": "ragePolpette" },
+  "plugins": [
+    {
+      "name": "cantus",
+      "source": "./plugin",
+      "description": "A map of the codebase for Claude Code: block briefings, API search and callers over MCP, per-block specialists, and hooks that warn when an edit breaks other blocks."
+    }
+  ]
+}

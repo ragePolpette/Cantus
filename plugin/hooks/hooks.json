@@ -1,0 +1,30 @@
+{
+  "description": "Cantus: project map at session start; block and callers context around edits; work written on the live map (also while the session is busy); the moment it asks you for a permission; specialists at work shown on it",
+  "hooks": {
+    "SessionStart": [
+      { "hooks": [{ "type": "command", "command": "node", "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/cantus.mjs", "hook", "session-start"], "timeout": 30 }] }
+    ],
+    "UserPromptSubmit": [
+      { "hooks": [{ "type": "command", "command": "node", "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/cantus.mjs", "hook", "user-prompt"], "timeout": 10 }] }
+    ],
+    "Stop": [
+      { "hooks": [{ "type": "command", "command": "node", "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/cantus.mjs", "hook", "stop"], "timeout": 10 }] }
+    ],
+    "PermissionRequest": [
+      { "hooks": [{ "type": "command", "command": "node", "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/cantus.mjs", "hook", "permission"], "timeout": 10 }] }
+    ],
+    "SubagentStart": [
+      { "matcher": "block-.*|group-.*", "hooks": [{ "type": "command", "command": "node", "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/cantus.mjs", "hook", "subagent-start"], "timeout": 10 }] }
+    ],
+    "SubagentStop": [
+      { "matcher": "block-.*|group-.*", "hooks": [{ "type": "command", "command": "node", "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/cantus.mjs", "hook", "subagent-stop"], "timeout": 10 }] }
+    ],
+    "PreToolUse": [
+      { "matcher": "Edit|Write|MultiEdit", "hooks": [{ "type": "command", "command": "node", "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/cantus.mjs", "hook", "pre-edit"], "timeout": 30 }] }
+    ],
+    "PostToolUse": [
+      { "matcher": "Edit|Write|MultiEdit", "hooks": [{ "type": "command", "command": "node", "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/cantus.mjs", "hook", "post-edit"], "timeout": 30 }] },
+      { "hooks": [{ "type": "command", "command": "node", "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/cantus.mjs", "hook", "tool-use"], "timeout": 10 }] }
+    ]
+  }
+}

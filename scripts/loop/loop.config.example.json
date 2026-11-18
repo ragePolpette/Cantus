@@ -1,0 +1,28 @@
+{
+  "work": "/work",
+  "reports": "/reports",
+  "model": null,
+  "rounds": 3,
+  "stableRounds": 2,
+  "budgetUsd": 40,
+  "budgetPerSession": 4,
+  "sessionTimeoutMin": 20,
+  "taskTimeoutMin": 40,
+  "longWaitMin": 3,
+  "scenarios": ["istruzioni", "plugin", "task-mappa", "task-mappa-cli", "task-autonomo", "task-tutto", "build-plan"],
+  "targets": [
+    { "name": "toy" },
+    {
+      "name": "legacy",
+      "path": "/targets/legacy",
+      "worktree": false,
+      "setup": null,
+      "verify": null,
+      "block": "<id di un blocco piccolo, da cantus analyze>",
+      "blockPrompt": "<un compito piccolo e vero su quel blocco; se vuoi provare il rifiuto, chiedi anche una riga in un file di un altro blocco>",
+      "allPrompt": "<un compito che tocca 2-3 blocchi>"
+    }
+  ],
+  "auth": { "tokenFile": "/home/<utente>/.config/cantus-loop/token" },
+  "fix": { "enabled": false, "budgetUsd": 8, "timeoutMin": 45, "model": null }
+}

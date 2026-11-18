@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "cantus": {
+      "command": "node",
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/scripts/cantus.mjs",
+        "mcp",
+        "--channels"
+      ]
+    }
+  }
+}

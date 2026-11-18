@@ -1,0 +1,6 @@
+# Written by Cantus: rebuilt on every run, not part of the project.
+# The map (model.json) is not listed here: it is meant to be committed.
+cache/
+runs/
+*.log
+*.html

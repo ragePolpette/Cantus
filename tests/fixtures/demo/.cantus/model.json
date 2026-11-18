@@ -1,0 +1,151 @@
+{
+  "version": 1,
+  "name": "demo-shop",
+  "blocks": [
+    {
+      "id": "src-web",
+      "name": "Storefront",
+      "layer": "interface",
+      "include": [
+        "src/web"
+      ],
+      "description": "Shop pages: lists products and runs the checkout."
+    },
+    {
+      "id": "admin",
+      "name": "Admin reports",
+      "layer": "interface",
+      "include": [
+        "admin"
+      ],
+      "description": "Back-office page with classic scripts for daily reports."
+    },
+    {
+      "id": "src-checkout",
+      "name": "Checkout",
+      "layer": "application",
+      "include": [
+        "src/checkout"
+      ],
+      "description": "Turns a cart into a placed order."
+    },
+    {
+      "id": "src-catalog",
+      "name": "Catalog",
+      "layer": "application",
+      "include": [
+        "src/catalog"
+      ],
+      "description": "Products offered by the shop."
+    },
+    {
+      "id": "src-orders",
+      "name": "Orders",
+      "layer": "application",
+      "include": [
+        "src/orders"
+      ],
+      "description": "Creates and reads orders through the backend API."
+    },
+    {
+      "id": "src-pricing",
+      "name": "Pricing",
+      "layer": "domain",
+      "include": [
+        "src/pricing"
+      ],
+      "description": "Cart totals and VAT."
+    },
+    {
+      "id": "backend-controllers",
+      "name": "Shop API",
+      "layer": "infrastructure",
+      "include": [
+        "Backend/Controllers"
+      ],
+      "description": "C# controllers for orders and products."
+    },
+    {
+      "id": "backend-services",
+      "name": "Report service",
+      "layer": "infrastructure",
+      "include": [
+        "Backend/Services"
+      ],
+      "description": "ASMX web service behind the admin reports."
+    }
+  ],
+  "dependencies": [
+    {
+      "from": "admin",
+      "to": "backend-services"
+    },
+    {
+      "from": "src-catalog",
+      "to": "backend-controllers"
+    },
+    {
+      "from": "src-checkout",
+      "to": "src-orders"
+    },
+    {
+      "from": "src-checkout",
+      "to": "src-pricing"
+    },
+    {
+      "from": "src-orders",
+      "to": "backend-controllers"
+    },
+    {
+      "from": "src-orders",
+      "to": "src-pricing"
+    },
+    {
+      "from": "src-web",
+      "to": "src-catalog"
+    },
+    {
+      "from": "src-web",
+      "to": "src-checkout"
+    },
+    {
+      "from": "src-web",
+      "to": "src-orders"
+    }
+  ],
+  "rules": {
+    "allow": {
+      "interface": [
+        "interface",
+        "application",
+        "domain",
+        "infrastructure"
+      ],
+      "application": [
+        "application",
+        "domain",
+        "infrastructure"
+      ],
+      "domain": [
+        "domain"
+      ],
+      "infrastructure": [
+        "infrastructure",
+        "domain"
+      ]
+    }
+  },
+  "docs": [
+    {
+      "path": "docs/conventions.md",
+      "common": true,
+      "description": "Money and module conventions"
+    },
+    {
+      "path": "docs/blocks/src-orders.md",
+      "blocks": [
+        "src-orders"
+      ]
+    }
+  ]
+}

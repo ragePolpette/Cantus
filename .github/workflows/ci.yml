@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: ${{ matrix.os }} / Node ${{ matrix.node }}${{ matrix.crlf && ' / autocrlf' || '' }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: [20, 22]
+        include:
+          # Git for Windows scrive i fine riga CRLF nel checkout (core.autocrlf=true): lo stesso giro su Linux lo prova a basso costo.
+          - os: ubuntu-24.04
+            node: 22
+            crlf: true
+    steps:
+      # Prima del checkout, perché valga anche per i file scritti da lui. Windows lo ha già di suo; qui è esplicito.
+      - name: core.autocrlf=true, come Git for Windows
+        if: matrix.crlf || runner.os == 'Windows'
+        run: git config --global core.autocrlf true
+      - uses: actions/checkout@v4
+      # La versione di pnpm viene da "packageManager" in package.json.
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+      # L'install esegue anche "prepare", cioè la build.
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm test

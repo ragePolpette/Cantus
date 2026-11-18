@@ -1,0 +1,10 @@
+Cantus
+Copyright 2026 Gianmarco Bastianelli
+
+Questo prodotto è distribuito con licenza Apache-2.0 (vedi LICENSE).
+
+Include le grammatiche Tree-sitter per C#, Go, Java, PHP, Python e Rust. Le licenze MIT
+e i relativi avvisi di copyright sono nei file grammars/*.LICENSE.
+
+La pagina della mappa incorpora IBM Plex Sans e IBM Plex Mono (src/outputs/fonts.ts), rilasciati con licenza
+SIL Open Font License 1.1: il testo è in licenses/IBM-Plex.LICENSE.

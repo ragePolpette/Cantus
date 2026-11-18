@@ -1,0 +1,323 @@
+{
+  "version": 1,
+  "name": "Cantus",
+  "blocks": [
+    {
+      "id": "cli",
+      "name": "CLI",
+      "layer": "interface",
+      "include": [
+        "src/cli.ts",
+        "src/main.ts",
+        "src/exit.ts",
+        "src/index.ts",
+        "src/init.ts"
+      ],
+      "description": "Command line entry point and the public package API."
+    },
+    {
+      "id": "src-analysis",
+      "name": "Analysis",
+      "layer": "application",
+      "include": [
+        "src/analysis"
+      ],
+      "description": "Reads the code with oxc: blocks, imports and call sites, contracts, API catalog, diagnostics, and findings against the map."
+    },
+    {
+      "id": "src-context",
+      "name": "Context",
+      "layer": "application",
+      "include": [
+        "src/context"
+      ],
+      "description": "Builds the briefing for working on one block: its API, the APIs it uses, its callers, open findings."
+    },
+    {
+      "id": "src-model",
+      "name": "Model",
+      "layer": "domain",
+      "include": [
+        "src/model"
+      ],
+      "description": "The map: blocks, dependencies, layer rules, and per-role agent settings."
+    },
+    {
+      "id": "src-outputs",
+      "name": "Outputs",
+      "layer": "interface",
+      "include": [
+        "src/outputs"
+      ],
+      "description": "Interactive HTML map and the per-block Claude Code subagents."
+    },
+    {
+      "id": "src-map",
+      "name": "Map",
+      "layer": "application",
+      "include": [
+        "src/map"
+      ],
+      "description": "Keeps the map in step with the code: updates it, writes per-block notes (AGENTS.md), scaffolds a new project from a design."
+    },
+    {
+      "id": "src-mcp",
+      "name": "MCP server",
+      "layer": "interface",
+      "include": [
+        "src/mcp"
+      ],
+      "description": "Exposes the map, block briefings, API search and callers to coding CLIs over MCP."
+    },
+    {
+      "id": "src-hooks",
+      "name": "Hooks",
+      "layer": "interface",
+      "include": [
+        "src/hooks"
+      ],
+      "description": "Claude Code hooks: a short map at session start, block and callers context before an edit, broken-API warnings after it; reads a compact project index."
+    },
+    {
+      "id": "src-serve",
+      "name": "Live map server",
+      "layer": "interface",
+      "include": [
+        "src/serve"
+      ],
+      "description": "Serves the live map on localhost: updates as the code changes, scopes of selected blocks, saving groups."
+    },
+    {
+      "id": "src-run",
+      "name": "Run",
+      "layer": "application",
+      "include": [
+        "src/run"
+      ],
+      "description": "Runs coding tasks started from the map: a Claude Code session (Agent SDK) briefed on a block or group, with approvals, optional git worktree, diff, merge or discard."
+    },
+    {
+      "id": "scripts",
+      "name": "Scripts",
+      "layer": "unassigned",
+      "include": [
+        "scripts",
+        "plugin/scripts",
+        "benchmark"
+      ],
+      "description": "Helper scripts for trying Cantus on a real project: collect a report of every step, measure the MCP answers, the phase 1 loop that tests it with a real Claude Code, and the accuracy benchmark against language servers (benchmark/)."
+    },
+    {
+      "id": "src-state",
+      "name": "Project state",
+      "layer": "application",
+      "include": [
+        "src/state"
+      ],
+      "description": "The analyzed project kept in memory for long-running processes (re-analyzed only when files change), and the compact index the hooks read."
+    }
+  ],
+  "dependencies": [
+    {
+      "from": "cli",
+      "to": "src-analysis"
+    },
+    {
+      "from": "cli",
+      "to": "src-context"
+    },
+    {
+      "from": "cli",
+      "to": "src-model"
+    },
+    {
+      "from": "cli",
+      "to": "src-outputs"
+    },
+    {
+      "from": "src-analysis",
+      "to": "src-model"
+    },
+    {
+      "from": "src-context",
+      "to": "src-analysis"
+    },
+    {
+      "from": "src-context",
+      "to": "src-model"
+    },
+    {
+      "from": "src-outputs",
+      "to": "src-analysis"
+    },
+    {
+      "from": "src-outputs",
+      "to": "src-context"
+    },
+    {
+      "from": "src-outputs",
+      "to": "src-model"
+    },
+    {
+      "from": "cli",
+      "to": "src-map"
+    },
+    {
+      "from": "cli",
+      "to": "src-mcp"
+    },
+    {
+      "from": "src-map",
+      "to": "src-analysis"
+    },
+    {
+      "from": "src-map",
+      "to": "src-model"
+    },
+    {
+      "from": "src-mcp",
+      "to": "src-analysis"
+    },
+    {
+      "from": "src-mcp",
+      "to": "src-context"
+    },
+    {
+      "from": "src-mcp",
+      "to": "src-map"
+    },
+    {
+      "from": "src-mcp",
+      "to": "src-model"
+    },
+    {
+      "from": "cli",
+      "to": "src-hooks"
+    },
+    {
+      "from": "src-hooks",
+      "to": "src-analysis"
+    },
+    {
+      "from": "src-hooks",
+      "to": "src-model"
+    },
+    {
+      "from": "cli",
+      "to": "src-serve"
+    },
+    {
+      "from": "src-serve",
+      "to": "src-context"
+    },
+    {
+      "from": "src-serve",
+      "to": "src-model"
+    },
+    {
+      "from": "src-serve",
+      "to": "src-outputs"
+    },
+    {
+      "from": "cli",
+      "to": "src-run"
+    },
+    {
+      "from": "src-run",
+      "to": "src-context"
+    },
+    {
+      "from": "src-run",
+      "to": "src-model"
+    },
+    {
+      "from": "src-serve",
+      "to": "src-run"
+    },
+    {
+      "from": "src-outputs",
+      "to": "src-map"
+    },
+    {
+      "from": "src-serve",
+      "to": "src-map"
+    },
+    {
+      "from": "cli",
+      "to": "src-state"
+    },
+    {
+      "from": "src-hooks",
+      "to": "src-state"
+    },
+    {
+      "from": "src-mcp",
+      "to": "src-state"
+    },
+    {
+      "from": "src-run",
+      "to": "src-state"
+    },
+    {
+      "from": "src-serve",
+      "to": "src-state"
+    },
+    {
+      "from": "src-state",
+      "to": "src-analysis"
+    },
+    {
+      "from": "src-state",
+      "to": "src-model"
+    },
+    {
+      "from": "scripts",
+      "to": "cli"
+    },
+    {
+      "from": "src-outputs",
+      "to": "src-state"
+    },
+    {
+      "from": "src-run",
+      "to": "src-map"
+    },
+    {
+      "from": "src-run",
+      "to": "src-analysis"
+    },
+    {
+      "from": "src-hooks",
+      "to": "src-outputs"
+    },
+    {
+      "from": "src-mcp",
+      "to": "src-outputs"
+    },
+    {
+      "from": "src-mcp",
+      "to": "src-run"
+    }
+  ],
+  "rules": {
+    "allow": {
+      "interface": [
+        "interface",
+        "application",
+        "domain"
+      ],
+      "application": [
+        "application",
+        "domain",
+        "infrastructure"
+      ],
+      "domain": [
+        "domain"
+      ],
+      "infrastructure": [
+        "infrastructure",
+        "domain"
+      ]
+    }
+  }
+}
