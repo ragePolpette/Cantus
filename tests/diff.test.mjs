@@ -255,3 +255,39 @@ test("the breaking gate locates dangling local references and named re-exports i
   const fixed = gate();
   assert.equal(fixed.status, 0, fixed.stderr);
 });
+
+test("the breaking gate follows star re-exports to remaining named imports", () => {
+  const project = repo();
+  const api = "src/orders/query.ts";
+  const barrel = "src/orders/public.ts";
+  const outer = "src/orders/outer.ts";
+  const consumer = "src/checkout/query.ts";
+  const original = "export function query() { return 42; }\nexport const own = query();\n";
+  project.write(api, original);
+  project.write(barrel, 'export * from "./query.js";\nexport * from "./outer.js";\n');
+  project.write(outer, 'export * from "./public.js";\n');
+  project.write(consumer, 'import { query as list } from "../orders/outer.js";\nexport const rows = list();\n');
+  project.run("add", "-A");
+  project.run("commit", "-qm", "add star barrel and caller");
+  const gate = () => spawnSync(process.execPath, [cli, "diff", "HEAD", "--fail-on", "breaking"], { cwd: project.root, encoding: "utf8" });
+
+  const renamed = original.replaceAll("query", "readQuery");
+  project.write(api, renamed);
+  const broken = gate();
+  assert.equal(broken.status, 1, broken.stderr);
+  assert.match(broken.stderr, /unresolved import to `query` at src\/checkout\/query.ts:1/);
+
+  project.write(api, renamed + "export { readQuery as query };\n");
+  const compatible = gate();
+  assert.equal(compatible.status, 0, compatible.stderr);
+
+  project.write(api, renamed);
+  project.write(outer, 'export * from "./public.js";\nexport { readQuery as query } from "./query.js";\n');
+  const forwarded = gate();
+  assert.equal(forwarded.status, 0, forwarded.stderr);
+
+  project.write(outer, 'export * from "./public.js";\n');
+  project.write(consumer, 'import { readQuery as list } from "../orders/outer.js";\nexport const rows = list();\n');
+  const fixed = gate();
+  assert.equal(fixed.status, 0, fixed.stderr);
+});

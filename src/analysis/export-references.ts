@@ -8,15 +8,18 @@ import { isVueFile, parseName, sfcParts } from "./vue.js";
 export const isJsSource = (file: string) => /\.(?:[cm]?[jt]s|[jt]sx|vue)$/i.test(file);
 
 type SourceSide = { analysis: Analysis; read: (file: string) => string | undefined };
-export type ExportReference = { file: string; line: number; kind: "local-reference" | "re-export" };
+export type ExportReference = { file: string; line: number; kind: "local-reference" | "re-export" | "import" };
 
-type ExportEntries = ReturnType<typeof parseSync>["module"]["staticExports"][number]["entries"];
+type ParsedModule = ReturnType<typeof parseSync>["module"];
+type ExportEntries = ParsedModule["staticExports"][number]["entries"];
 
 interface ReferenceReader {
   exportsOf(file: string): ExportEntries;
   reExports(file: string, name: string): ExportReference[];
   provides(file: string, name: string): boolean;
   targetOf(from: string, specifier: string): string | undefined;
+  importers(file: string): string[];
+  starBarrels(file: string, name: string): string[];
   references(file: string, name: string): ExportReference[];
   dangling(file: string, name: string, before: ReferenceReader): ExportReference[];
 }
@@ -24,15 +27,23 @@ interface ReferenceReader {
 export function exportReferenceReader(side: SourceSide): ReferenceReader {
   const files = new Set(Object.keys(side.analysis.fileTokens).filter(isJsSource));
   const resolve = createResolver(side.analysis.root, files, []);
-  const parsed = new Map<string, ExportEntries>();
-  function exportsOf(file: string) {
-    const cached = parsed.get(file);
-    if (cached) return cached;
-    const source = side.read(file);
-    const entries = source === undefined ? [] : parseSync(parseName(file), isVueFile(file) ? sfcParts(source).script : source).module.staticExports.flatMap((entry) => entry.entries);
-    parsed.set(file, entries);
-    return entries;
+  const parsed = new Map<string, ParsedModule | undefined>();
+  const importedBy = new Map<string, Set<string>>();
+  for (const { from, to } of side.analysis.fileImports) {
+    if (!isJsSource(from)) continue;
+    const callers = importedBy.get(to) ?? new Set<string>();
+    callers.add(from);
+    importedBy.set(to, callers);
   }
+  const importers = (file: string) => [...(importedBy.get(file) ?? [])];
+  function moduleOf(file: string) {
+    if (!parsed.has(file)) {
+      const source = side.read(file);
+      parsed.set(file, source === undefined ? undefined : parseSync(parseName(file), isVueFile(file) ? sfcParts(source).script : source).module);
+    }
+    return parsed.get(file);
+  }
+  const exportsOf = (file: string) => moduleOf(file)?.staticExports.flatMap((entry) => entry.entries) ?? [];
   const targetOf = (from: string, specifier: string) => {
     const target = resolve(specifier, from);
     return target.kind === "internal" ? target.file : undefined;
@@ -44,30 +55,65 @@ export function exportReferenceReader(side: SourceSide): ReferenceReader {
     moduleInfo.set(file, info);
     return info.freeRefs;
   };
-  function provides(file: string, name: string, seen = new Set<string>()): boolean {
+  /** Resolve a name through local exports, explicit forwarders, and star barrels. */
+  function exportSources(file: string, name: string, seen = new Set<string>()): Set<string> {
     const key = `${file}\0${name}`;
-    if (seen.has(key)) return false;
     const source = side.read(file);
-    if (source === undefined) return false;
-    for (const entry of exportsOf(file)) {
-      if (entry.exportName.name !== name) continue;
-      if (!entry.moduleRequest) {
+    if (seen.has(key) || source === undefined) return new Set();
+    const nextSeen = new Set([...seen, key]);
+    const entries = exportsOf(file);
+    const explicit = entries.filter((entry) => entry.exportName.name === name);
+    const sources = new Set<string>();
+    for (const entry of explicit.length || name === "default" ? explicit : entries) {
+      const specifier = entry.moduleRequest?.value;
+      if (!specifier) {
+        if (entry.exportName.name !== name) continue;
         const local = entry.localName.name;
-        if (!local || !(freeReferences(file, source)[local]?.length)) return true;
-      } else if (entry.importName.name) {
-        const target = targetOf(file, entry.moduleRequest.value);
-        if (target && provides(target, entry.importName.name, new Set([...seen, key]))) return true;
+        if (!local || !freeReferences(file, source)[local]?.length) sources.add(key);
+        continue;
+      }
+      const star = entry.importName.kind === "AllButDefault";
+      if (!star && entry.exportName.name !== name) continue;
+      const target = resolve(specifier, file);
+      const forwarded = star ? name : entry.importName.name;
+      if (target.kind === "internal" && forwarded) {
+        for (const origin of exportSources(target.file, forwarded, nextSeen)) sources.add(origin);
+      } else if (target.kind === "internal" && entry.importName.kind === "All") {
+        sources.add(target.file + "\0*");
+      } else if (target.kind === "external" || target.kind === "non-source") {
+        // Unknown outside the analyzed tree: do not claim a downstream import was broken.
+        sources.add(`${file}\0${specifier}\0${forwarded ?? "*"}`);
       }
     }
-    return false;
+    return sources;
   }
+
+  function starBarrels(file: string, name: string): string[] {
+    const origin = `${file}\0${name}`;
+    const seen = new Set([file]);
+    const queue = [file];
+    for (const target of queue) {
+      for (const barrel of importers(target)) {
+        if (seen.has(barrel)) continue;
+        const forwards = exportsOf(barrel).some((entry) => entry.importName.kind === "AllButDefault" &&
+          entry.moduleRequest && targetOf(barrel, entry.moduleRequest.value) === target);
+        if (!forwards) continue;
+        const origins = exportSources(barrel, name);
+        if (origins.size !== 1 || !origins.has(origin)) continue;
+        seen.add(barrel);
+        queue.push(barrel);
+      }
+    }
+    return queue.slice(1);
+  }
+
+  const provides = (file: string, name: string) => exportSources(file, name).size > 0;
   function reExports(file: string, name: string): ExportReference[] {
     const result: ExportReference[] = [];
-    for (const edge of side.analysis.fileImports) {
-      if (edge.to !== file || !edge.symbols.includes(name) || !isJsSource(edge.from)) continue;
-      for (const entry of exportsOf(edge.from)) {
-        if (entry.moduleRequest && entry.importName.name === name && targetOf(edge.from, entry.moduleRequest.value) === file) {
-          result.push({ file: edge.from, line: lineColumn(side.read(edge.from)!, entry.start).line, kind: "re-export" });
+    for (const importer of importers(file)) {
+      for (const entry of exportsOf(importer)) {
+        if (entry.moduleRequest && entry.importName.name === name && targetOf(importer, entry.moduleRequest.value) === file) {
+          result.push({ file: importer, line: lineColumn(side.read(importer)!, entry.start).line, kind: "re-export" });
         }
       }
     }
@@ -79,6 +125,8 @@ export function exportReferenceReader(side: SourceSide): ReferenceReader {
     targetOf,
     provides,
     reExports,
+    importers,
+    starBarrels,
     references(file: string, name: string): ExportReference[] {
       if (!isJsSource(file)) return [];
       const source = side.read(file);
@@ -108,6 +156,26 @@ export function exportReferenceReader(side: SourceSide): ReferenceReader {
           if (target !== file && !(target === undefined && source === undefined && before.targetOf(barrelFile, specifier) === file)) continue;
           result.push({ file: barrelFile, line: lineColumn(barrel, entry.start).line, kind: "re-export" });
         }
+      }
+      for (const barrel of before.starBarrels(file, name)) {
+        if (provides(barrel, name)) continue;
+        for (const importer of new Set([...importers(barrel), ...before.importers(barrel)])) {
+          const text = side.read(importer);
+          if (text === undefined) continue;
+          const stillTargetsBarrel = (specifier: string) => {
+            const target = targetOf(importer, specifier);
+            return target === barrel || (target === undefined && side.read(barrel) === undefined && before.targetOf(importer, specifier) === barrel);
+          };
+          for (const statement of moduleOf(importer)?.staticImports ?? []) {
+            if (!stillTargetsBarrel(statement.moduleRequest.value)) continue;
+            for (const entry of statement.entries) {
+              if (entry.importName.name === name) {
+                result.push({ file: importer, line: lineColumn(text, entry.importName.start ?? statement.start).line, kind: "import" });
+              }
+            }
+          }
+        }
+        result.push(...reExports(barrel, name));
       }
       return uniqueReferences(result);
     },

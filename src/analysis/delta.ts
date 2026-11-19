@@ -192,7 +192,7 @@ export function deltaFailures(delta: MapDelta, level: "breaking" | "strict"): st
   if (broken) out.push(`${broken} place(s) still use an export that was removed, in files this change did not touch.`);
   for (const change of delta.exports.changed) {
     for (const reference of change.dangling ?? []) {
-      out.push(`unresolved ${reference.kind === "re-export" ? "re-export" : "local reference"} to \`${change.name}\` at ${reference.file}:${reference.line}.`);
+      out.push(`unresolved ${reference.kind.replace("local-reference", "local reference")} to \`${change.name}\` at ${reference.file}:${reference.line}.`);
     }
   }
   const errors = delta.findings.added.filter((finding) => finding.severity === "error");
@@ -277,7 +277,7 @@ export function renderDelta(delta: MapDelta): string {
           const used = change.callers.length === 0 ? (change.dangling?.length ? "no other indexed callers" : delta.inferred ? "no other file used it" : "no other block used it") : `${change.callers.length} use(s) in ${elsewhere}${left.length ? `, **${left.length} in files this change did not touch**: ${where(left)}` : ", all in files this change touched"}`;
           const shown = change.kind === "changed" && change.after && change.before.length <= SHAPE_LIMIT && change.after.length <= SHAPE_LIMIT ? `\n  - \`${change.before}\` → \`${change.after}\`` : "";
           const what = change.kind === "moved" ? `moved from ${tick(change.file)} to ${tick(change.movedTo!)}` : `${change.kind} in ${tick(change.file)}`;
-          const dangling = (change.dangling ?? []).map((reference) => `\n  - unresolved ${reference.kind === "re-export" ? "re-export" : "local reference"}: ${tick(`${reference.file}:${reference.line}`)}`).join("");
+          const dangling = (change.dangling ?? []).map((reference) => `\n  - unresolved ${reference.kind.replace("local-reference", "local reference")}: ${tick(`${reference.file}:${reference.line}`)}`).join("");
           return `- ${tick(change.name)} ${what} (${tick(change.block)}): ${change.members ? `${change.members}. ` : ""}${used}${shown}${dangling}`;
         }),
       ),
