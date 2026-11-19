@@ -39,3 +39,15 @@ Se il browser standard non è disponibile, i test accettano `CANTUS_TEST_BROWSER
 Allineare README, esempi e limiti al candidato provato. Non presentare risparmio di token o miglioramento della qualità come dimostrati senza un confronto misurato. Fissare versione e changelog, verificare licenza e attribuzioni, controllare i file del pacchetto e i riferimenti da rendere pubblici.
 
 Pubblicazione npm e cambio di visibilità restano azioni distinte del manutentore. `prepublishOnly` ripete `verify:release`; non sostituisce le prove manuali sopra.
+
+## Evidenza del candidato del 19 novembre 2026
+
+| Ambiente | Prova | Esito |
+|---|---|---|
+| Linux x64, Node 24.22.3, Chromium headless 153.0.8010.0 | `npm run verify:release` con `CANTUS_TEST_BROWSER_PATH` | 818 su 818, inclusi i test browser. 23 file richiesti nel pacchetto. Installazione pulita e nove smoke test linguistici riusciti. |
+| Linux x64, Node 20.20.2 | `init`, `diff`, MCP e integrità del pacchetto | 35 su 35 |
+| Linux x64, Node 22.23.5 | Stesse prove mirate | 35 su 35 |
+| Windows nativo | Supporto runtime e sessioni agenti | Verifica pendente |
+| Codex CLI in sandbox read-only | Pilot A/B su h3 e ohash | 12 tentativi fermati all'avvio del sandbox. Nessuna risposta o metrica di consumo. |
+
+I [dati del benchmark](../benchmark/publication/README.md) includono tempi di primo uso, riferimenti TypeScript e il controllo delle rinomine. Il [pilot agenti](../benchmark/agent-workflows/README.md) contiene i comandi e i criteri per ripetere il confronto.

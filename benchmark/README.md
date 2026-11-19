@@ -1,8 +1,18 @@
-# Accuracy of the call sites (L1)
+# Cantus benchmarks
+
+| Suite | Measures | Reproduce |
+|---|---|---|
+| [Publication benchmark](publication/README.md) | TypeScript cross-file references, first-use wall time and breaking-change checks on three pinned repositories | [Method and commands](publication/README.md#reproduce), [raw results](publication/results.json), [smoke runner](publication/smoke.mjs) |
+| [Language-server comparisons](#historical-cross-file-reference-results) | Earlier cross-file reference measurements on Python, Go, Rust and C# repositories | [Commands](#run-it), [reference scripts](l1/) |
+| [Agent workflow pilot](agent-workflows/README.md) | A/B protocol for agent impact questions, with exact answer scoring and token usage when available | [Runner](agent-workflows/codex-impact.mjs) |
+
+## Historical cross-file reference results
+
+The numbers below were recorded on earlier Cantus revisions. The publication benchmark above records the current candidate and its tested source tree.
 
 What this measures: for the exported symbols of a real project, the uses of each symbol in **other files**, as Cantus finds them (`callers`, the call sites of `cantus analyze --json`), against what a **language server** reports for the same symbol (`textDocument/references`). The server is the reference, not an oracle: where it does not see a file (code built for another system, tests) the file is left out on both sides, and the scripts say how.
 
-## Results (03/11/2026)
+### Results from 3 November 2026
 
 | Project | Language | Reference | Symbols (with uses) | Precision | Recall (call sites) | Recall before the 03/11 fixes |
 |---|---|---|---|---|---|---|
@@ -19,11 +29,11 @@ Cantus `d7d8418` (main after #245). Projects: httpx `b5addb6`, fzf `99bfd5a`, ju
 
 What the numbers do **not** say:
 - **One project per language.** No confidence interval. httpx exports 130 symbols, fewer than the 200 a proper sample needs.
-- **Only four languages.** Java and JavaScript/TypeScript were not measured against a server.
+- **Only four languages.** These historical server runs did not cover Java or JavaScript/TypeScript.
 - **The recall left is mostly methods and qualified paths.** Python: annotations; Go: `pkg.Name` where several files declare the name for different systems; Rust: `Self::Variant`, `module::function`, `use Enum::*`. A method called on a value is not linked in any of them (no type inference).
 - The same-package rule (Go) and the glob rule (Rust) were added on 03/11 after this benchmark found the two largest holes; the "before" column is the benchmark run on the code of 02/11.
 
-## Run it
+### Run it
 
 You need a compiled Cantus (`pnpm build`), the project to measure (clean checkout, no `.cantus`) and its language server on the PATH. Nothing from the project is built or run by these scripts; the servers may read the project's manifest (`cargo metadata`, `go list`), so use a checkout you do not mind them touching.
 

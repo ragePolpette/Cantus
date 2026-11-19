@@ -1,20 +1,18 @@
 # Cantus
 
-A map of your codebase for developers and coding agents. It splits a project into **blocks**, finds who uses what between them, and gives each block a focused briefing, so several agents (or you and an agent) can work on the same code without breaking each other's work.
+Cantus maps a repository into blocks, then shows who depends on an API before you or a coding agent change it. Use the local map to explore the code, give an agent a block briefing over MCP, or run a Git diff check for broken references.
 
-> **Work in progress.** Cantus is under active development and has not had a public release. It runs and has a test suite, but it is not proven, and the [limits below](#what-it-does-not-do-yet) are real. Expect rough edges and changes. It is not on npm yet: you install it from this repository.
-
-*Formerly ArchFlow. A project mapped with ArchFlow keeps its map: the first `cantus` command moves `.archflow/` to `.cantus/`.*
+On h3, Cantus matched 1,060 of 1,079 cross-file TypeScript references in the benchmark sample. See the [results](#benchmarks) and [reproduction instructions](benchmark/).
 
 ![Cantus live map of a demo shop: TypeScript front end, admin page with classic scripts, C# backend](docs/view.png)
 
 ## What it does
 
-- **Blocks and arrows.** The analysis reads your code and proposes blocks (modules) and the dependencies between them. You name them, describe them and group them in `.cantus/model.json`; the map is a guide, not a lock.
-- **Callers and breaking changes.** For every export it knows the places in other blocks that use it. After an edit it warns when an export other blocks use was removed or changed, with the call sites to update. `cantus impact` shows what a change in a block can reach, directly and through others.
-- **Front end to backend.** It links each `fetch`/ajax call to the endpoint that serves it (ASP.NET, Minimal API, Flask, FastAPI, Django), and shows both sides in the briefings.
-- **A briefing per block.** What the block exports, what it uses from the others, who calls it, its tests and its team documents, with a default budget of about 14k estimated tokens. Per-block notes (`AGENTS.md` in each block's folder) replace one huge `CLAUDE.md`.
-- **For coding agents.** An MCP server (Claude Code, Codex, any MCP client), a Claude Code plugin with hooks and per-block specialist subagents, and tasks started from the live map or from the command line.
+- **Blocks and arrows.** The analysis reads your code and proposes blocks (modules) and the dependencies between them. You can name, describe and group them in `.cantus/model.json`.
+- **Callers and breaking changes.** For recognized exports it indexes references from other blocks. After an edit it warns when an export other blocks use was removed or changed, with the call sites to update. `cantus impact` shows what a change in a block can reach, directly and through others.
+- **Front end to backend.** It links statically recognizable `fetch` and Ajax calls to endpoints in ASP.NET, Minimal API, Flask, FastAPI and Django.
+- **A briefing per block.** What the block exports, what it uses from the others, who calls it, its tests and its team documents, with a default budget of about 14k estimated tokens. Cantus can also generate per-block `AGENTS.md` notes.
+- **For coding agents.** An MCP server, a Claude Code plugin with hooks and per-block specialists, and Git worktree workflows for reviewing agent changes.
 
 ## Languages
 
@@ -25,24 +23,28 @@ A map of your codebase for developers and coding agents. It splits a project int
 
 Files in other languages (Kotlin, Ruby, Swift, C and C++…) belong to their blocks with their size, but are not read. Details per language are in the [reference](docs/REFERENCE.md).
 
-## Install
+## Try it
 
-Requires Node 20.19+ (20.x) or Node 22.12+ and `git`, matching the OXC parsers' runtime requirements.
+Requires Git, Node 20.19+ (20.x) or Node 22.12+, and pnpm.
 
 ```bash
-git clone https://github.com/ragePolpette/Cantus.git && cd Cantus
-pnpm install && pnpm build
-npm link                  # puts `cantus` on your PATH (or: alias cantus="node $(pwd)/dist/cli.js")
+git clone https://github.com/ragePolpette/Cantus.git
+cd Cantus
+pnpm install --frozen-lockfile
+node dist/cli.js impact src-pricing -C tests/fixtures/shop
+node dist/cli.js serve -C tests/fixtures/shop
 ```
 
-For Claude Code, add the plugin (it runs the `cantus` command, so install that first):
+The first command after installation shows where a pricing change can reach. Open the printed local URL to explore the shop map. For your own repository, run `node /path/to/Cantus/dist/cli.js init -C /path/to/project`. To use the shorter `cantus` command, run `npm link` in the Cantus checkout. The GitHub checkout is the current distribution channel.
+
+For Claude Code, install the plugin after putting `cantus` on your PATH.
 
 ```bash
 claude plugin marketplace add ragePolpette/Cantus
 claude plugin install cantus@cantus
 ```
 
-Claude Code session starts, resumes, clears and compactions do not run analysis. The edit hooks use the existing index. Run `cantus index` in your project to build or refresh it. MCP analysis tools analyze on request. If there is no saved map, use `open_map` to start the session's live map. Opening it in the browser loads the analysis.
+Run `cantus index` in the project to build or refresh the index used by Claude Code hooks. The MCP server analyzes on request. Codex can connect to the [read-only MCP profile](docs/INIT.md).
 
 ## Start
 
@@ -76,30 +78,32 @@ cantus check              # findings and analysis problems; exits 1 on errors
 - **New project mode.** In the live map, "Edit the map" sketches layers, blocks and arrows before there is code ("Describe the project" asks Claude Code for a draft), and "Build the plan" prepares a new worktree whose Claude Code session (its lead) builds the planned blocks in waves, providers first, each through its block's specialist. Over MCP: `sketch_map`.
 - **Work from the map, to the lead of a worktree.** Select blocks, write what should be done, and say where it goes: to the Claude Code session open in this worktree (its *lead*, which gives it to the block's specialist), to the one open in another worktree of the repository, or to a new worktree, which Cantus makes and for which it gives the lines that open a session. The map shows each worktree as working, waiting for you, to review or merged; it does not start agents or follow conversations, and a worktree Cantus made is reviewed and merged or discarded there. Unattended runs, with a gate and a separate verifier, are for the command line: `cantus task`, `cantus plan run`, `cantus verify`.
 - **MCP.** `cantus mcp` serves the tools (`map`, `block_context`, `symbol_context`, `find_api`, `callers`, `impact`, `diff`, `review_changes`, …). Your own MCP servers (database, CI…) reach unattended tasks by default; `"agent": { "mcp": { "deny": ["jenkins"] } }` in the map refuses the ones you name, and `agent.mcp.specialists` / `agent.mcp.blocks.<id>` take servers away from the block specialists. See the reference.
-- **`cantus refine` (experimental).** Claude Code writes a description and a few notes for each block. Optional and not part of the normal flow. Measured on task success, cost and steps, it showed no advantage on two projects. In use it has placed `unassigned` blocks in the right layer and added descriptions, but it does not always improve the map: check what it changed. The analysis does the heavy lifting.
+- **`cantus refine` (experimental).** Claude Code can suggest descriptions, notes and layer assignments for blocks. Review the proposed changes against your project.
 
-## Compared with the alternatives
+## Benchmarks
 
-We have not benchmarked Cantus against any of these, so this is about what each one is for, not who is better.
+The 19 November 2026 run used Linux x64, Node 24.22.3 and TypeScript language service 6.0.3. It compared distinct cross-file references to named exports in production TypeScript files. The first `init --no-serve` timings are medians from five fresh checkouts per repository and include CLI startup. They exclude clone, installation and browser rendering.
 
-- **Claude Code on its own, with its subagents.** It reads your code by searching and has no map of who depends on whom. Cantus adds the map, indexed references across files, per-block briefings and the checks around a change. Whether that saves tokens or catches more mistakes is exactly what the [benchmark protocol](benchmark/agent-workflows/README.md) says is still to be measured (same task, with and without Cantus, tokens counted, failed checks and regressions compared).
-- **Session managers (Conductor, Claude Squad, Vibe Kanban and similar).** They run several agent sessions side by side, each in its own folder. As far as we know they do not model the architecture, so they cannot say that two tasks touch the same contract or that a change breaks a caller in another block. Cantus does, and also runs the check and the independent review before a merge. We have not used them side by side, and Cantus's own session handling (worktrees, `claude --resume`, a terminal of your choice) is young.
-- **Code knowledge graphs for agents (Graphify and similar).** They cut an agent's searching by giving it a graph of the code, and read many more languages than Cantus. As far as we could read their documentation (02/11), they are a memory layer for one agent: no layers or dependency rules, no check that a change breaks a contract used elsewhere, no orchestration or gate before the merge. Their published numbers are mostly about conversational memory, with a very small code sample; Cantus's own measure is against language servers (`benchmark/`) and has the same kind of limits.
-- **A language server or your IDE.** Exact where it works, and the right tool to find the real references of a symbol. Cantus's analysis is syntactic and says so; `cantus csharp` can ask Roslyn for a single answer when it matters. Cantus is not an editor feature: its output is for agents and for a review of a change.
+| Repository | TypeScript references matched | Recall | Files read by init | First init |
+|---|---:|---:|---:|---:|
+| h3 | 1,060 / 1,079 | 98.2% | 113 | 867 ms |
+| ohash | 3 / 3 | 100% | 8 | 1,166 ms |
+| ofetch | 42 / 43 | 97.7% | 15 | 356 ms |
 
-## What it does not do yet
+Cantus reported zero extra references within these samples. h3 accounted for most observations, and all three projects are from the same ecosystem. The ofetch miss is a reference through an `export *` file.
 
-Said plainly, because the project is young:
+In a distinct breaking-change check, `cantus diff HEAD --fail-on breaking` blocked one incompatible function rename on each repository. All three passed after adding a compatibility alias. The ofetch case exercises a named import through `export *`. Run the project compiler and tests alongside this check.
 
-- **The quality of the code the agents write is not measured.** The test loop on real projects checks that a task ends in a merge, stays inside its scope and leaves `cantus check` clean. It does not judge the code: a run can be green with a worse result than another, and a task can finish with the job only partly done.
-- **No proven advantage over Claude Code alone.** No benchmark compares the same tasks with and without Cantus yet. The map's value, the warnings and the briefings are real, but what they save in cost, time or errors is not shown.
-- **Reference coverage has limits.** The diff gate checks unresolved local references and named re-exports after a JS/TS export is removed. Include the project’s typecheck and tests in the gate for compiler and behavior checks.
-- **The analysis is syntactic.** Measured against pyright, gopls and rust-analyzer on one project per language (httpx, fzf, just), it finds 95–97% of the cross-file uses, with about 99% precision or better, and nothing is measured for the other languages: see [benchmark](benchmark/README.md) for how, the limits and how to repeat it. Calls found by name are marked as less certain; there is no type inference, so a method called on a value is not linked in Go and Java; URLs built at run time, routes registered in code and namespace objects are not recognized. Blocks come from your folders: in layered projects the inferred blocks can cut a feature apart and the map needs editing by hand.
-- **Tested on few projects.** Runs with a real Claude Code: a TypeScript library (h3) and a Python library (werkzeug). Go (fzf) and Rust (ripgrep) have one run each with a real Claude Code (plugin, task on one block, task on the whole project, all passing): one run per repository, so a smoke test and not a measure of reliability, and the quality of the code produced was not reviewed. Java has been checked on real code and on small fixtures, with no agent run.
-- **Native Windows agent sessions are unverified.** CI runs the test suite on Linux and Windows. Testing the plugin, hooks and tasks with a real Claude Code session on native Windows is still pending.
-- **Codex has not been tried for real.** The `codex` runner and the read-only MCP profile (`cantus mcp --read-only`) are tested against simulated SDK events and a generic MCP client; a real Codex session timed out in the smoke test. Claude Code is the only agent exercised. The `claude-cli` runner is only partly tested.
-- **The orchestration engine is young.** Tasks and plans survive a restart, Cantus runs the check itself and sends a failure back to the agent, a separate reviewer sees the work before it is merged, and a plan merges one task at a time (`cantus plan`). It has been exercised with a scripted agent and in pieces with a real Claude Code, not as a whole run on a real project. Plan tasks run one after the other: there is no parallel execution yet, and the live map does not show or approve plans (the command line does).
-- **Not published.** No npm package; install from the repository. Publishing is the last step of the project (decided 10/11).
+- [Benchmark directory](benchmark/) for the suite index and scripts.
+- [Method and reproduction commands](benchmark/publication/README.md) and [raw data](benchmark/publication/results.json) for the results above.
+- [Earlier language-server comparisons](benchmark/README.md#historical-cross-file-reference-results) for Python, Go, Rust and C#.
+- [Agent workflow pilot](benchmark/agent-workflows/README.md) for the Codex A/B harness. All 12 attempts stopped during sandbox startup, so there are no scored token, speed or quality results.
+
+## Verification and limits
+
+- The Linux release check passed 818 tests, including browser tests, on Node 24.22.3. Focused runs passed 35 tests each on Node 20.20.2 and 22.23.5. A clean tarball installation verified that the CLI can analyze samples in nine languages. Native Windows verification is pending. [Release checks](docs/RELEASE.md)
+- Static analysis can miss dynamic URLs, namespace accesses, type-inferred references and some re-export paths. [Language coverage](docs/REFERENCE.md)
+- Existing ArchFlow maps migrate from `.archflow/` to `.cantus/` on first use.
 
 ## Documentation
 
@@ -120,9 +124,7 @@ pnpm test       # builds, then runs node --test
 
 Cantus builds with TypeScript 7 and maps itself: see `.cantus/model.json` and the `AGENTS.md` files in `src/`.
 
-## License
-
-[Apache-2.0](LICENSE). See [NOTICE](NOTICE) for the bundled grammar.
+## Advanced usage
 
 ### Local inputs for verification
 
@@ -139,3 +141,7 @@ cantus csharp references src/Orders.cs 12 16 --solution App.sln --trust
 ```
 
 Use `definition`, `implementation` or `references` with a 1-based line and UTF-16 column. The command accepts a solution or project in the workspace and outputs JSON. Omitting `--solution` uses the server's project discovery. Run this command only on trusted projects, since Roslyn can execute project code. The semantic lookup is separate from the static analysis and runs on demand.
+
+## License
+
+[Apache-2.0](LICENSE). See [NOTICE](NOTICE) for the bundled grammars.

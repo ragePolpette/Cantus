@@ -336,7 +336,7 @@ Cantus checks the answer before writing it: a note that names a file that does n
 
 `base` defaults to origin's main (master); the comparison starts where your branch left it, so work that landed on main since is not counted as yours. `head` defaults to the working tree, uncommitted work included; give a branch or commit to compare two states without checking anything out. Each side is read from git into a temporary folder and analyzed with its own map (a map not committed yet is used for both), so your working tree is never switched. `--json` prints the data. The same answer is the `diff` MCP tool, to run before opening the pull request. In CI, with a full clone (`fetch-depth: 0`), `cantus diff origin/main >> "$GITHUB_STEP_SUMMARY"` puts it on the run's page.
 
-For a removed JS/TS export, `diff --fail-on breaking` also checks unresolved references in the declaring file and named re-exports in analyzed files. The output reports candidate file and line. Dynamic exports and wildcard re-export chains remain outside this check. Use the project compiler and tests for semantic and behavioral verification.
+For a removed JS/TS export, `diff --fail-on breaking` also checks unresolved references in the declaring file, named re-exports, and named imports through identifiable `export *` chains in analyzed files. The output reports the affected file and line. Use the project compiler and tests to cover dynamic exports, namespace accesses, and semantic and behavioral changes.
 
 Limits: the comparison is as sure as the analysis (calls found by name only are marked); a changed export means its declaration differs, not that its behavior does; without a saved map the blocks are inferred and can shift as files are added, which the output says.
 

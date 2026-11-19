@@ -1,0 +1,428 @@
+{
+  "date": "2026-11-19",
+  "cantusSourceTree": "d30797ad13589ccdcc81ef8e7896cac7a9b36be7",
+  "cantusPublicBaseline": "e678a56b208b71d4ecf7bf0c70d8c2ef4630d972",
+  "typescriptLanguageService": "6.0.3",
+  "projects": [
+    {
+      "repository": "https://github.com/unjs/h3",
+      "sourceFileCount": 90,
+      "revision": "2f29b875617e8daf39d25118f7474fd4c24fbfe1",
+      "runtime": "v24.22.3",
+      "platform": "linux-x64",
+      "cpu": "AMD EPYC 9V74 80-Core Processor",
+      "availableParallelism": 9,
+      "apiFile": "src/utils/sanitize.ts",
+      "symbol": "sanitizeStatusCode",
+      "runs": [
+        {
+          "trial": 1,
+          "filesRead": 113,
+          "blocks": 7,
+          "dryRunMs": 1028,
+          "firstInitMs": 773,
+          "secondInitMs": 443,
+          "htmlRenderMs": 1051,
+          "htmlBytes": 842816
+        },
+        {
+          "trial": 2,
+          "filesRead": 113,
+          "blocks": 7,
+          "dryRunMs": 778,
+          "firstInitMs": 1089,
+          "secondInitMs": 462,
+          "htmlRenderMs": 662,
+          "htmlBytes": 842816
+        },
+        {
+          "trial": 3,
+          "filesRead": 113,
+          "blocks": 7,
+          "dryRunMs": 985,
+          "firstInitMs": 843,
+          "secondInitMs": 469,
+          "htmlRenderMs": 1082,
+          "htmlBytes": 842816
+        },
+        {
+          "trial": 4,
+          "filesRead": 113,
+          "blocks": 7,
+          "dryRunMs": 626,
+          "firstInitMs": 886,
+          "secondInitMs": 695,
+          "htmlRenderMs": 763,
+          "htmlBytes": 842816
+        },
+        {
+          "trial": 5,
+          "filesRead": 113,
+          "blocks": 7,
+          "dryRunMs": 887,
+          "firstInitMs": 867,
+          "secondInitMs": 522,
+          "htmlRenderMs": 915,
+          "htmlBytes": 842816
+        }
+      ],
+      "gate": {
+        "baseline": {
+          "exit": 0,
+          "findings": []
+        },
+        "removedExport": {
+          "exit": 1,
+          "findings": [
+            "cantus diff --fail-on breaking: the change does not pass.",
+            "  - 3 place(s) still use an export that was removed, in files this change did not touch.",
+            "  - unresolved re-export to `sanitizeStatusCode` at src/index.ts:176."
+          ]
+        },
+        "compatibilityAlias": {
+          "exit": 0,
+          "findings": []
+        }
+      },
+      "referenceScore": {
+        "symbolsWithUses": 234,
+        "symbolsNoUsesBoth": 195,
+        "callSite": {
+          "tp": 1060,
+          "fp": 0,
+          "fn": 19,
+          "precision": "100.0%",
+          "recall": "98.2%"
+        },
+        "file": {
+          "tp": 489,
+          "fp": 0,
+          "fn": 10,
+          "precision": "100.0%",
+          "recall": "98.0%"
+        }
+      },
+      "referenceDisagreements": [
+        {
+          "key": "HTTPError@src/error.ts",
+          "truth": 70,
+          "cantus": 68,
+          "hit": 68,
+          "onlyCantus": [],
+          "onlyTruth": [
+            "src/utils/auth.ts:50",
+            "src/utils/auth.ts:129"
+          ]
+        },
+        {
+          "key": "HTTPEvent@src/event.ts",
+          "truth": 41,
+          "cantus": 39,
+          "hit": 39,
+          "onlyCantus": [],
+          "onlyTruth": [
+            "src/utils/auth.ts:48",
+            "src/utils/auth.ts:125"
+          ]
+        },
+        {
+          "key": "H3EventContext@src/types/context.ts",
+          "truth": 19,
+          "cantus": 18,
+          "hit": 18,
+          "onlyCantus": [],
+          "onlyTruth": [
+            "src/utils/auth.ts:103"
+          ]
+        },
+        {
+          "key": "Middleware@src/types/handler.ts",
+          "truth": 36,
+          "cantus": 35,
+          "hit": 35,
+          "onlyCantus": [],
+          "onlyTruth": [
+            "src/utils/auth.ts:118"
+          ]
+        },
+        {
+          "key": "ResolvedRouteRules@src/types/route-rules.ts",
+          "truth": 7,
+          "cantus": 5,
+          "hit": 5,
+          "onlyCantus": [],
+          "onlyTruth": [
+            "src/rules/match.ts:353",
+            "src/rules/match.ts:358"
+          ]
+        },
+        {
+          "key": "getEventContext@src/utils/event.ts",
+          "truth": 8,
+          "cantus": 7,
+          "hit": 7,
+          "onlyCantus": [],
+          "onlyTruth": [
+            "src/utils/auth.ts:103"
+          ]
+        },
+        {
+          "key": "textEncoder@src/utils/internal/encoding.ts",
+          "truth": 7,
+          "cantus": 3,
+          "hit": 3,
+          "onlyCantus": [],
+          "onlyTruth": [
+            "src/utils/internal/iron-crypto.ts:161",
+            "src/utils/internal/iron-crypto.ts:243",
+            "src/utils/internal/iron-crypto.ts:246",
+            "src/utils/internal/iron-crypto.ts:289"
+          ]
+        },
+        {
+          "key": "textDecoder@src/utils/internal/encoding.ts",
+          "truth": 1,
+          "cantus": 0,
+          "hit": 0,
+          "onlyCantus": [],
+          "onlyTruth": [
+            "src/utils/internal/iron-crypto.ts:272"
+          ]
+        },
+        {
+          "key": "base64Encode@src/utils/internal/encoding.ts",
+          "truth": 3,
+          "cantus": 0,
+          "hit": 0,
+          "onlyCantus": [],
+          "onlyTruth": [
+            "src/utils/internal/iron-crypto.ts:76",
+            "src/utils/internal/iron-crypto.ts:77",
+            "src/utils/internal/iron-crypto.ts:164"
+          ]
+        },
+        {
+          "key": "base64Decode@src/utils/internal/encoding.ts",
+          "truth": 2,
+          "cantus": 0,
+          "hit": 0,
+          "onlyCantus": [],
+          "onlyTruth": [
+            "src/utils/internal/iron-crypto.ts:139",
+            "src/utils/internal/iron-crypto.ts:144"
+          ]
+        }
+      ]
+    },
+    {
+      "repository": "https://github.com/unjs/ohash",
+      "sourceFileCount": 8,
+      "revision": "764b0a3203308956ef07597612af5ad59f36c791",
+      "runtime": "v24.22.3",
+      "platform": "linux-x64",
+      "cpu": "AMD EPYC 9V74 80-Core Processor",
+      "availableParallelism": 9,
+      "apiFile": "src/serialize.ts",
+      "symbol": "serialize",
+      "runs": [
+        {
+          "trial": 1,
+          "filesRead": 8,
+          "blocks": 3,
+          "dryRunMs": 1022,
+          "firstInitMs": 1443,
+          "secondInitMs": 412,
+          "htmlRenderMs": 313,
+          "htmlBytes": 404606
+        },
+        {
+          "trial": 2,
+          "filesRead": 8,
+          "blocks": 3,
+          "dryRunMs": 1199,
+          "firstInitMs": 1072,
+          "secondInitMs": 350,
+          "htmlRenderMs": 354,
+          "htmlBytes": 404606
+        },
+        {
+          "trial": 3,
+          "filesRead": 8,
+          "blocks": 3,
+          "dryRunMs": 1141,
+          "firstInitMs": 1257,
+          "secondInitMs": 307,
+          "htmlRenderMs": 326,
+          "htmlBytes": 404606
+        },
+        {
+          "trial": 4,
+          "filesRead": 8,
+          "blocks": 3,
+          "dryRunMs": 1298,
+          "firstInitMs": 1108,
+          "secondInitMs": 357,
+          "htmlRenderMs": 682,
+          "htmlBytes": 404606
+        },
+        {
+          "trial": 5,
+          "filesRead": 8,
+          "blocks": 3,
+          "dryRunMs": 1072,
+          "firstInitMs": 1166,
+          "secondInitMs": 317,
+          "htmlRenderMs": 312,
+          "htmlBytes": 404606
+        }
+      ],
+      "gate": {
+        "baseline": {
+          "exit": 0,
+          "findings": []
+        },
+        "removedExport": {
+          "exit": 1,
+          "findings": [
+            "cantus diff --fail-on breaking: the change does not pass.",
+            "  - 3 place(s) still use an export that was removed, in files this change did not touch.",
+            "  - unresolved re-export to `serialize` at src/index.ts:2."
+          ]
+        },
+        "compatibilityAlias": {
+          "exit": 0,
+          "findings": []
+        }
+      },
+      "referenceScore": {
+        "symbolsWithUses": 1,
+        "symbolsNoUsesBoth": 7,
+        "callSite": {
+          "tp": 3,
+          "fp": 0,
+          "fn": 0,
+          "precision": "100.0%",
+          "recall": "100.0%"
+        },
+        "file": {
+          "tp": 3,
+          "fp": 0,
+          "fn": 0,
+          "precision": "100.0%",
+          "recall": "100.0%"
+        }
+      },
+      "referenceDisagreements": []
+    },
+    {
+      "repository": "https://github.com/unjs/ofetch",
+      "sourceFileCount": 7,
+      "revision": "1dbc37fd1ceab832fc7c90cad81b1091c95ba563",
+      "runtime": "v24.22.3",
+      "platform": "linux-x64",
+      "cpu": "AMD EPYC 9V74 80-Core Processor",
+      "availableParallelism": 9,
+      "apiFile": "src/fetch.ts",
+      "symbol": "createFetch",
+      "runs": [
+        {
+          "trial": 1,
+          "filesRead": 15,
+          "blocks": 1,
+          "dryRunMs": 330,
+          "firstInitMs": 356,
+          "secondInitMs": 347,
+          "htmlRenderMs": 571,
+          "htmlBytes": 405065
+        },
+        {
+          "trial": 2,
+          "filesRead": 15,
+          "blocks": 1,
+          "dryRunMs": 333,
+          "firstInitMs": 342,
+          "secondInitMs": 418,
+          "htmlRenderMs": 324,
+          "htmlBytes": 405065
+        },
+        {
+          "trial": 3,
+          "filesRead": 15,
+          "blocks": 1,
+          "dryRunMs": 323,
+          "firstInitMs": 345,
+          "secondInitMs": 320,
+          "htmlRenderMs": 308,
+          "htmlBytes": 405065
+        },
+        {
+          "trial": 4,
+          "filesRead": 15,
+          "blocks": 1,
+          "dryRunMs": 429,
+          "firstInitMs": 357,
+          "secondInitMs": 335,
+          "htmlRenderMs": 329,
+          "htmlBytes": 405065
+        },
+        {
+          "trial": 5,
+          "filesRead": 15,
+          "blocks": 1,
+          "dryRunMs": 333,
+          "firstInitMs": 359,
+          "secondInitMs": 544,
+          "htmlRenderMs": 308,
+          "htmlBytes": 405065
+        }
+      ],
+      "gate": {
+        "baseline": {
+          "exit": 0,
+          "findings": []
+        },
+        "removedExport": {
+          "exit": 1,
+          "findings": [
+            "cantus diff --fail-on breaking: the change does not pass.",
+            "  - unresolved import to `createFetch` at src/index.ts:1."
+          ]
+        },
+        "compatibilityAlias": {
+          "exit": 0,
+          "findings": []
+        }
+      },
+      "referenceScore": {
+        "symbolsWithUses": 19,
+        "symbolsNoUsesBoth": 13,
+        "callSite": {
+          "tp": 42,
+          "fp": 0,
+          "fn": 1,
+          "precision": "100.0%",
+          "recall": "97.7%"
+        },
+        "file": {
+          "tp": 24,
+          "fp": 0,
+          "fn": 1,
+          "precision": "100.0%",
+          "recall": "96.0%"
+        }
+      },
+      "referenceDisagreements": [
+        {
+          "key": "createFetch@src/fetch.ts",
+          "truth": 1,
+          "cantus": 0,
+          "hit": 0,
+          "onlyCantus": [],
+          "onlyTruth": [
+            "src/index.ts:13"
+          ]
+        }
+      ]
+    }
+  ]
+}
